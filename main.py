@@ -2,12 +2,14 @@
 Career Watchdog - CLI Entry Point.
 """
 import sys
+import os
 import argparse
 import asyncio
 from crawler import CareerCrawler
 from db import JobDatabase
 from scheduler import run_single_scan, start_cron_daemon
 from console_view import display_job_table, print_banner
+from health_server import start_health_server
 from rich.console import Console
 
 console = Console()
@@ -25,9 +27,13 @@ def parse_interval(interval_str: str) -> int:
         try:
             return int(s)
         except ValueError:
-            return 21600  # 6 hours default
+            return 3600  # 1 hour default
 
 def main():
+    # If running on Render or any cloud host with $PORT, bind dummy port immediately
+    if os.environ.get("PORT"):
+        start_health_server()
+
     parser = argparse.ArgumentParser(
         description="Career Watchdog: Cron job to monitor today and yesterday's tech openings in India & Remote."
     )

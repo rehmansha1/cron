@@ -75,7 +75,11 @@ async def start_cron_daemon(
     interval_desc = f"{hours:g} hour(s)" if hours >= 1 else f"{interval_seconds // 60} minutes"
 
     console.print(f"[bold green]Starting Career Watchdog Cron Monitor...[/bold green]")
-    console.print(f"[cyan]Schedule: Running every {interval_desc} ({interval_seconds}s)[/cyan]")
+    # Start lightweight dummy HTTP health check for Render / Cloud Web Services
+    from health_server import start_health_server
+    health_port = start_health_server()
+    console.print(f"[dim]Health check server listening on port {health_port} (for Render/Cloud health checks)[/dim]")
+
     if send_telegram and TELEGRAM_ENABLED:
         console.print(f"[bold magenta]Telegram alerts enabled -> Chat ID: {TELEGRAM_CHAT_ID}[/bold magenta]")
     if quiet:
